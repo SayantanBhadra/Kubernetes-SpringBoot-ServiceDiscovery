@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  firstservice
+  namespace: sayantan
+  labels:
+    app:  firstservice
+spec:
+  selector:
+    matchLabels:
+      app: firstservice
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  firstservice
+    spec:
+      # initContainers:
+        # Init containers are exactly like regular containers, except:
+          # - Init containers always run to completion.
+          # - Each init container must complete successfully before the next one starts.
+      serviceAccountName: sayantan-service-account
+      containers:
+      - name:  firstservice
+        image:  sayantanbhadra/firstservice:1.0
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 500m
+            memory: 500Mi
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+        ports:
+        - containerPort:  8080
+          name:  firstservice
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-firstservice
+  namespace: sayantan
+spec:
+  selector:
+    app: firstservice
+  type: NodePort
+  ports:
+  - name: firstservice
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+    # If you set the `spec.type` field to `NodePort` and you want a specific port number,
+    # you can specify a value in the `spec.ports[*].nodePort` field.
